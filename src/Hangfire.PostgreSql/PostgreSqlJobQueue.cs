@@ -99,7 +99,7 @@ namespace Hangfire.PostgreSql
       ";
 
       connection.Execute(enqueueJobSql,
-        new { JobId = Convert.ToInt64(jobId, CultureInfo.InvariantCulture), Queue = queue });
+        new { JobId = Guid.Parse(jobId), Queue = queue });
 
       if (_storage.Options.EnableLongPolling)
       {
@@ -194,7 +194,7 @@ namespace Hangfire.PostgreSql
 
       return new PostgreSqlFetchedJob(_storage,
         fetchedJob.Id,
-        fetchedJob.JobId.ToString(CultureInfo.InvariantCulture),
+        fetchedJob.JobId.ToString(),
         fetchedJob.Queue);
     }
 
@@ -263,7 +263,7 @@ namespace Hangfire.PostgreSql
 
       return new PostgreSqlFetchedJob(_storage,
         markJobAsFetched.Id,
-        markJobAsFetched.JobId.ToString(CultureInfo.InvariantCulture),
+        markJobAsFetched.JobId.ToString(),
         markJobAsFetched.Queue);
     }
 
@@ -319,8 +319,8 @@ namespace Hangfire.PostgreSql
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private class FetchedJob
     {
-      public long Id { get; set; }
-      public long JobId { get; set; }
+      public Guid Id { get; set; }
+      public Guid JobId { get; set; }
       public string Queue { get; set; }
       public DateTime? FetchedAt { get; set; }
       public int UpdateCount { get; set; }

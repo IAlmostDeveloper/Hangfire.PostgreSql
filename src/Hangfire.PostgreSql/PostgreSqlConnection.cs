@@ -122,13 +122,13 @@ namespace Hangfire.PostgreSql
       InvocationData invocationData = InvocationData.SerializeJob(job);
 
       return _storage.UseTransaction(_dedicatedConnection, (connection, transaction) => {
-        string jobId = connection.QuerySingle<long>(createJobSql,
+        string jobId = connection.QuerySingle<Guid>(createJobSql,
           new {
             InvocationData = new JsonParameter(SerializationHelper.Serialize(invocationData)),
             Arguments = new JsonParameter(invocationData.Arguments, JsonParameter.ValueType.Array),
             CreatedAt = createdAt,
             ExpireAt = createdAt.Add(expireIn),
-          }).ToString(CultureInfo.InvariantCulture);
+          }).ToString();
 
         if (parameters.Count > 0)
         {
@@ -137,7 +137,7 @@ namespace Hangfire.PostgreSql
           foreach (KeyValuePair<string, string> parameter in parameters)
           {
             parameterArray[parameterIndex++] = new {
-              JobId = Convert.ToInt64(jobId, CultureInfo.InvariantCulture),
+              JobId = Guid.Parse(jobId),
               Name = parameter.Key,
               parameter.Value,
             };
@@ -170,7 +170,7 @@ namespace Hangfire.PostgreSql
 
       SqlJob jobData = _storage.UseConnection(_dedicatedConnection,
         connection => connection
-          .Query<SqlJob>(sql, new { Id = Convert.ToInt64(id, CultureInfo.InvariantCulture) })
+          .Query<SqlJob>(sql, new { Id = Guid.Parse(id) })
           .SingleOrDefault());
 
       if (jobData == null)
@@ -218,7 +218,7 @@ namespace Hangfire.PostgreSql
 
       SqlState sqlState = _storage.UseConnection(_dedicatedConnection,
         connection => connection
-          .Query<SqlState>(sql, new { JobId = Convert.ToInt64(jobId, CultureInfo.InvariantCulture) })
+          .Query<SqlState>(sql, new { JobId = Guid.Parse(jobId) })
           .SingleOrDefault());
       return sqlState == null
         ? null
@@ -264,7 +264,7 @@ namespace Hangfire.PostgreSql
       ";
 
       _storage.UseConnection(_dedicatedConnection, connection => connection
-        .Execute(sql, new { JobId = Convert.ToInt64(id, CultureInfo.InvariantCulture), Name = name, Value = value }));
+        .Execute(sql, new { JobId = Guid.Parse(id), Name = name, Value = value }));
     }
 
     public override string GetJobParameter(string id, string name)
@@ -282,7 +282,7 @@ namespace Hangfire.PostgreSql
       string query = $@"SELECT ""value"" FROM ""{_options.SchemaName}"".""jobparameter"" WHERE ""jobid"" = @Id AND ""name"" = @Name;";
 
       return _storage.UseConnection(_dedicatedConnection, connection => connection
-        .QuerySingleOrDefault<string>(query, new { Id = Convert.ToInt64(id, CultureInfo.InvariantCulture), Name = name }));
+        .QuerySingleOrDefault<string>(query, new { Id = Guid.Parse(id), Name = name }));
     }
 
     public override HashSet<string> GetAllItemsFromSet(string key)

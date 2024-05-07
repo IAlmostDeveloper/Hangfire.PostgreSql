@@ -19,6 +19,7 @@
 //   
 //    Special thanks goes to him.
 
+using System;
 using System.Collections.Generic;
 
 namespace Hangfire.PostgreSql
@@ -26,8 +27,8 @@ namespace Hangfire.PostgreSql
   public interface IPersistentJobQueueMonitoringApi
   {
     IEnumerable<string> GetQueues();
-    IEnumerable<long> GetEnqueuedJobIds(string queue, int from, int perPage);
-    IEnumerable<long> GetFetchedJobIds(string queue, int from, int perPage);
+    IEnumerable<Guid> GetEnqueuedJobIds(string queue, int perPage);
+    IEnumerable<Guid> GetFetchedJobIds(string queue, int perPage);
     EnqueuedAndFetchedCountDto GetEnqueuedAndFetchedCount(string queue);
   }
 }

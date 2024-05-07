@@ -41,14 +41,14 @@ namespace Hangfire.PostgreSql
       return _storage.UseConnection(null, connection => connection.Query<string>(sqlQuery).ToList());
     }
 
-    public IEnumerable<long> GetEnqueuedJobIds(string queue, int from, int perPage)
+    public IEnumerable<Guid> GetEnqueuedJobIds(string queue, int perPage)
     {
-      return GetQueuedOrFetchedJobIds(queue, false, from, perPage);
+      return GetQueuedOrFetchedJobIds(queue, false, perPage);
     }
 
-    public IEnumerable<long> GetFetchedJobIds(string queue, int from, int perPage)
+    public IEnumerable<Guid> GetFetchedJobIds(string queue, int perPage)
     {
-      return GetQueuedOrFetchedJobIds(queue, true, from, perPage);
+      return GetQueuedOrFetchedJobIds(queue, true, perPage);
     }
 
     public EnqueuedAndFetchedCountDto GetEnqueuedAndFetchedCount(string queue)
@@ -77,7 +77,7 @@ namespace Hangfire.PostgreSql
       };
     }
 
-    private IEnumerable<long> GetQueuedOrFetchedJobIds(string queue, bool fetched, int from, int perPage)
+    private IEnumerable<Guid> GetQueuedOrFetchedJobIds(string queue, bool fetched, int perPage)
     {
       string sqlQuery = $@"
         SELECT j.""id"" 
@@ -87,11 +87,11 @@ namespace Hangfire.PostgreSql
         AND jq.""fetchedat"" {(fetched ? "IS NOT NULL" : "IS NULL")}
         AND j.""id"" IS NOT NULL
         ORDER BY jq.""fetchedat"", jq.""jobid""
-        LIMIT @Limit OFFSET @Offset;
+        LIMIT @Limit;
       ";
 
-      return _storage.UseConnection(null, connection => connection.Query<long>(sqlQuery,
-          new { Queue = queue, Offset = from, Limit = perPage })
+      return _storage.UseConnection(null, connection => connection.Query<Guid>(sqlQuery,
+          new { Queue = queue, Limit = perPage })
         .ToList());
     }
   }

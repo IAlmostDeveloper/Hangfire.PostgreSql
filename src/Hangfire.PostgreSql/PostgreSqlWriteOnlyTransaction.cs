@@ -88,7 +88,7 @@ namespace Hangfire.PostgreSql
       ";
 
       QueueCommand(con => con.Execute(sql,
-        new { Id = Convert.ToInt64(jobId, CultureInfo.InvariantCulture) }));
+        new { Id = Guid.Parse(jobId)}));
     }
 
     public override void PersistJob(string jobId)
@@ -100,7 +100,7 @@ namespace Hangfire.PostgreSql
       ";
 
       QueueCommand(con => con.Execute(sql,
-        new { Id = Convert.ToInt64(jobId, CultureInfo.InvariantCulture) }));
+        new { Id = Guid.Parse(jobId) }));
     }
 
     public override void SetJobState(string jobId, IState state)
@@ -118,12 +118,12 @@ namespace Hangfire.PostgreSql
 
       QueueCommand(con => con.Execute(addAndSetStateSql,
         new {
-          JobId = Convert.ToInt64(jobId, CultureInfo.InvariantCulture),
+          JobId = Guid.Parse(jobId),
           state.Name,
           state.Reason,
           CreatedAt = DateTime.UtcNow,
           Data = new JsonParameter(SerializationHelper.Serialize(state.SerializeData())),
-          Id = Convert.ToInt64(jobId, CultureInfo.InvariantCulture),
+          Id = Guid.Parse(jobId),
         }));
     }
 
@@ -136,7 +136,7 @@ namespace Hangfire.PostgreSql
 
       QueueCommand(con => con.Execute(addStateSql,
         new {
-          JobId = Convert.ToInt64(jobId, CultureInfo.InvariantCulture),
+          JobId = Guid.Parse(jobId),
           state.Name,
           state.Reason,
           CreatedAt = DateTime.UtcNow,
